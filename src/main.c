@@ -12,12 +12,7 @@
 #define HEIGHT 5
 #define WIDTH 15
 
-enum _mode{
-    add,
-    sub,
-    multi,
-    divi
-};
+const char operation_symbols[4]={'+','-','*','/'};
 
 typedef struct _tile{
     int x, y, h, w;
@@ -27,18 +22,18 @@ typedef struct _tile{
 void init_tile(TILE *tile);
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void print_help();
-short *update_score(short *score, short *input_ans, int *num1, int *num2);
+short select_operation(short *operation,short *num1, short *num2);
 
 int main(int argc, char **argv){
     
-    short num1, num2; 
-
-    char ch, input_ans;
+    short input_ans, operation;
+    static short num1, num2;
+    char ch; 
     static short score = 0;
     time_t t;
     TILE tile;
-    WINDOW *question;
-    WINDOW *answer;
+    WINDOW *question_w;
+    WINDOW *answer_w;
 
     if(argc < 2){
 	printf("ERROR: %sNot enough arguments %s\n",ERROR,WHITE);
@@ -50,49 +45,56 @@ int main(int argc, char **argv){
 	exit(EXIT_FAILURE);
     }
     srand((unsigned) time(&t));
-    num1 = rand() % atoi(argv[1]);
-    num2 = rand() % atoi(argv[1]);
-
+    
+    /*
     initscr();
     cbreak();
-    noecho();
+    //noecho();
     keypad(stdscr, TRUE);
 
     refresh();
     init_tile(&tile);
-    question = create_newwin(tile.h, tile.w, tile.y-3, tile.x);
-    answer= create_newwin(tile.h, tile.w, tile.y+3, tile.x);
-    mvwprintw(question,HEIGHT/2,(WIDTH-strlen("x -- x"))/2,"%d -- %d", num1, num2);
-    wrefresh(question);
+    question_w = create_newwin(tile.h, tile.w, tile.y-3, tile.x);
+    answer_w= create_newwin(tile.h, tile.w, tile.y+3, tile.x);
+    mvprintw(10,10,"Score: %d", score);
     refresh();
 
+    wmove(answer_w, HEIGHT/2, WIDTH/2);
+    wrefresh(answer_w);
+
     while((ch = getch()) != 'q'){
-
-
-	switch(ch){
-	    case 'e':
-		mvwprintw(answer, HEIGHT/2,(WIDTH/4),"%s", input_ans);
-		wrefresh(answer);
-		break;
-	}
+	mvwprintw(question_w,HEIGHT/2,(WIDTH-strlen("x -- x"))/2,"%d %c %d", num1,operation_symbols[operation], num2);
+	wrefresh(question_w);
+	mvwscanw(answer_w, HEIGHT/2, WIDTH/2, "%d", &input_ans);
+	printw("\n %d %c %d ",&num1, operation_symbols[operation],&num2);
+	printw("\n %d -- %d ",input_ans, select_operation(&operation, &num1, &num2));
+	mvprintw(10,10,"Score: %d", score);
+	refresh();
     }
     endwin();
+    */
+
     
-    /*
-    int test1 = 0;
-    int test2 = 3;
-    while(num1 !=0){
-	update_score(&score, &input_ans, &test1, &test2);
-	printf("main: %d \n", score);
-	num1--;
-    }*/
+    for(short i=0; i<9; i++){
+	num1 = rand() % atoi(argv[1]);
+	num2 = rand() % atoi(argv[1]);
+	operation = 1;
+	select_operation(&operation, &num1, &num2);
+	printf(" Score: %hd \n %hd %c %hd = ", score,num1, operation_symbols[operation], num2);
+	scanf("%hd", &input_ans);
+	if(select_operation(&operation, &num1, &num2) == input_ans){
+	    score+=1; //update score
+	}
+    }
+    
+
     return 0;
 }
 
 void print_help(){
 
-    printf("Just one argument is enough\n");
-    printf("Select Range upto 10,000\n");
+    printf("\t Just one argument is enough\n");
+    printf("\t Select Range upto 10,000\n");
 
 }
 
@@ -113,12 +115,23 @@ WINDOW *create_newwin(int height, int width, int starty, int startx){
     return (local_win);
 }
 
-short *update_score(short *score, short *input_ans, int *num1, int *num2){
-    int calc_answer = *(num1)+*(num2);
-    printf("%d -- %d \n", *(num1), *(num2));
-    if(calc_answer == *(input_ans)){
-	*(score)+=1;
-	printf("func: %d \n", *(score));
+short select_operation(short *operation, short *num1, short *num2){
+    short result;
+
+    if(*(operation) == 0){
+	result=*(num1)+*(num2);
     }
-    return score;
+    if(*(operation) == 1){
+	result=*(num1) - *(num2);
+    }
+    if(*(operation) == 2){
+	result=*(num1) * *(num2);
+    }
+    else if(*(operation) == 3){
+	result=*(num1) / *(num2);
+    }
+
+    //printf("result: %d \n", result);
+    return result;
 }
+

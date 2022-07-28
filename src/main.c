@@ -27,7 +27,7 @@ short select_operation(short *operation,short *num1, short *num2);
 int main(int argc, char **argv){
     
     short input_ans = 0, operation = 0;
-    short num1 = 0, num2 = 0;
+    short num1 = 0, num2 = 0, result = 0;
     char ch; 
     static short score = 0;
     time_t t;
@@ -64,13 +64,23 @@ int main(int argc, char **argv){
     wrefresh(answer_w);
 
     while((ch = getch()) != 'q'){
+        num1 = rand() % atoi(argv[1]);
+        num2 = rand() % atoi(argv[1]);
+        operation = rand() % 4;
+        result = select_operation(&operation, &num1, &num2);
+        //printf(" Score: %hd \n %hd %c %hd = ", score,num1, operation_symbols[operation], num2);
+        //scanf("%hd", &input_ans);
         mvwprintw(question_w,HEIGHT/2,(WIDTH-strlen("x -- x"))/2,"%d %c %d", num1,operation_symbols[operation], num2);
         wrefresh(question_w);
         mvwscanw(answer_w, HEIGHT/2, WIDTH/2, "%hd", &input_ans);
-        printw("\n %hn %c %hn ",&num1, operation_symbols[operation],&num2);
-        printw("\n %d -- %d ",input_ans, select_operation(&operation, &num1, &num2));
+        wrefresh(answer_w);
+        //printw("\n %hn %c %hn ",&num1, operation_symbols[operation],&num2);
+        //printw("\n %d -- %d ",input_ans, select_operation(&operation, &num1, &num2));
         mvprintw(10,10,"Score: %d", score);
-        refresh();
+        if(result == input_ans){
+            score+=1; //update score
+            refresh();
+        }
     }
     endwin();
 
